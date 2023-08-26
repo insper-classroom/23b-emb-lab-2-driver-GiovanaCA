@@ -136,6 +136,29 @@ void _pio_set_output(Pio *p_pio, const uint32_t ul_mask, const uint32_t ul_defau
 	}
 }
 
+// _pio_get()
+uint32_t _pio_get(Pio *p_pio, const pio_type_t ul_type, const uint32_t ul_mask)
+{
+	uint32_t valor = 0;
+	if (ul_type == PIO_INPUT){
+		valor = p_pio->PIO_PDSR & ul_mask;
+	}
+	if (ul_type == PIO_OUTPUT_0){
+		if (p_pio->PIO_ODSR & ul_mask){
+			valor = 1;
+		}
+	}
+	return valor;
+}
+
+// _delay_ms()
+void _delay_ms(int tms)
+{
+	for (int i = 0; i < 200000*tms; i++){
+		__asm__("nop");
+	}
+}
+
 // Função de inicialização do uC
 void init(void) {
   // Initialize the board clock
@@ -162,14 +185,6 @@ void init(void) {
   _pio_set_input(BUT1_PIO, BUT1_PIO_IDX_MASK, _PIO_PULLUP | _PIO_DEBOUNCE);
   _pio_set_input(BUT2_PIO, BUT2_PIO_IDX_MASK, _PIO_PULLUP | _PIO_DEBOUNCE);
   _pio_set_input(BUT3_PIO, BUT3_PIO_IDX_MASK, _PIO_PULLUP | _PIO_DEBOUNCE);
-
-//   pio_set_input(BUT1_PIO, BUT1_PIO_IDX_MASK, PIO_DEFAULT);
-//   pio_set_input(BUT2_PIO, BUT2_PIO_IDX_MASK, PIO_DEFAULT);
-//   pio_set_input(BUT3_PIO, BUT3_PIO_IDX_MASK, PIO_DEFAULT);
-
-//   _pio_pull_up(BUT1_PIO, BUT1_PIO_IDX_MASK, 1);
-//   _pio_pull_up(BUT2_PIO, BUT2_PIO_IDX_MASK, 1);
-//   _pio_pull_up(BUT3_PIO, BUT3_PIO_IDX_MASK, 1);
 }
 
 /************************************************************************/
@@ -181,33 +196,33 @@ int main(void) {
   init();
 
   while (1) {
-    if (!pio_get(BUT1_PIO, PIO_INPUT,
+    if (!_pio_get(BUT1_PIO, PIO_INPUT,
                  BUT1_PIO_IDX_MASK)) { // Caso aperte Botao 1
       for (int i = 0; i < 5; i++) {
         _pio_set(LED1_PIO, LED1_PIO_IDX_MASK);
-        delay_ms(200);
+        _delay_ms(200);
         _pio_clear(LED1_PIO, LED1_PIO_IDX_MASK);
-        delay_ms(200);
+        _delay_ms(200);
       }
       _pio_clear(LED1_PIO, LED1_PIO_IDX_MASK);
     }
-    if (!pio_get(BUT2_PIO, PIO_INPUT,
+    if (!_pio_get(BUT2_PIO, PIO_INPUT,
                  BUT2_PIO_IDX_MASK)) { // Caso aperte Botao 2
       for (int i = 0; i < 5; i++) {
         _pio_set(LED2_PIO, LED2_PIO_IDX_MASK);
-        delay_ms(200);
+        _delay_ms(200);
         _pio_clear(LED2_PIO, LED2_PIO_IDX_MASK);
-        delay_ms(200);
+        _delay_ms(200);
       }
       _pio_clear(LED2_PIO, LED2_PIO_IDX_MASK);
     }
-    if (!pio_get(BUT3_PIO, PIO_INPUT,
+    if (!_pio_get(BUT3_PIO, PIO_INPUT,
                  BUT3_PIO_IDX_MASK)) { // Caso aperte Botao 3
       for (int i = 0; i < 5; i++) {
         _pio_set(LED3_PIO, LED3_PIO_IDX_MASK);
-        delay_ms(200);
+        _delay_ms(200);
         _pio_clear(LED3_PIO, LED3_PIO_IDX_MASK);
-        delay_ms(200);
+        _delay_ms(200);
       }
       _pio_clear(LED3_PIO, LED3_PIO_IDX_MASK);
     }
